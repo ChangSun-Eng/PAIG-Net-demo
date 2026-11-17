@@ -10,6 +10,7 @@
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="showcase.css">
   <script defer src="media/fields.js"></script>
+  <script defer src="cases/catalog.js"></script>
   <script defer src="method/network-method-scene.js"></script>
   <script defer src="method/gmb-scene.js"></script>
   <script defer src="showcase.js"></script>
@@ -28,10 +29,14 @@
         <h1>Thermomechanical field comparison</h1>
         <p>Follow the same laser scan in the Abaqus reference and the PAIG-Net prediction.</p>
       </div>
-      <div class="viewer">
+      <div class="case-bar" id="caseLabel">
+        <label for="caseSelect">Scan configuration</label>
+        <select id="caseSelect" aria-label="Scan configuration"><option value="117">C2-117</option></select>
+        <span class="case-params" id="caseParams"></span>
+      </div>
+      <div class="viewer" id="hdViewer">
         <div class="toolbar">
           <div id="field" class="field-picker" role="group" aria-label="Displayed field"></div>
-          <span class="case-label" id="caseLabel"></span>
         </div>
         <div id="frameView" class="frame-view">
           <img id="fieldFrame" alt="" width="2368" height="984" hidden>
@@ -55,11 +60,13 @@
           </div>
         </div>
       </div>
+      <div id="caseViewer" hidden></div>
       <details class="notes">
         <summary>Data, timing and colour scales</summary>
         <div class="notes-body">
           <p id="provenance"></p><p id="fieldNote"></p>
-          <p>Among the ten saved C2 configurations with all three paired fields, C2-117 has the lowest case-level WAPE for temperature rise (<strong>1.72%</strong>), equivalent total logarithmic strain (<strong>4.91%</strong>), and von Mises stress (<strong>6.27%</strong>). Each score pools all volume nodes and all 120 recorded frames.</p>
+          <p id="caseScores"></p>
+          <p>The five examples have the lowest mean rank across temperature-rise, equivalent-strain and von Mises stress WAPE among ten dense-time cases. Each field’s WAPE pools all volume nodes and all 120 extraction records for one configuration.</p>
           <p>Both views use the same mesh, camera and colour scale for the selected field. Each frame shows its stored solver time. Switching fields selects the nearest available scan progress on that field’s clock.</p>
         </div>
       </details>

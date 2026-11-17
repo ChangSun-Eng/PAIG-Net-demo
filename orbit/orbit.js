@@ -2,8 +2,15 @@
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
-  const data = window.orbitSurface;
+  let data, viewerReady=false;
   const query = new URLSearchParams(location.search);
+  const cases=window.PAIG_CASES || [{id:117,label:"C2-117"}];
+  const activeCase=cases.find(c=>c.id===Number(query.get('case'))) || cases.find(c=>c.id===117);
+  const folder=activeCase.id===117 ? '' : '../cases/C2-'+activeCase.id+'/';
+  const embedded=query.get('embed')==='1' && window.parent!==window;
+  document.documentElement.classList.toggle('embed',embedded);
+  $('caseInfo').textContent = embedded ? 'Drag to rotate both views' : activeCase.label+' · Linked cameras';
+  $('expand').hidden=!embedded;
   const chosen = query.get('field');
   const fieldNames = ['temperature', 'strain', 'stress'];
   let field = fieldNames.includes(chosen) ? chosen : 'temperature';
@@ -50,7 +57,7 @@
   function loadField(key) {
     if (!pending.has(key)) pending.set(key, new Promise((resolve,reject) => {
       const script = document.createElement('script');
-      script.src = key + '.js';
+      script.src = folder + key + '.js';
       script.onerror = () => reject(Error('The saved display colours could not be opened.'));
       script.onload = async () => {
         try {
@@ -174,11 +181,23 @@
     surface.dataset.displayed=field+'/'+(frame+1);
   }
   function paint(){if(!renderQueued){renderQueued=true;requestAnimationFrame(render);}}
+  function notifyParent() {
+    if (!embedded) return;
+    window.parent.postMessage({type:'paig-view',case:activeCase.id,field,record:frame+1,
+      height:Math.ceil(document.querySelector('main').getBoundingClientRect().height)+2},
+      location.protocol==='file:' ? '*' : location.origin);
+  }
+  function updateLinks() {
+    const params=new URLSearchParams({case:String(activeCase.id),field,record:String(frame+1)});
+    $('back').href='../index.html?'+params+'#comparison';
+    $('expand').href='index.html?'+params;
+    notifyParent();
+  }
   function updateFrame(index) {
     frame=Math.max(0,Math.min(119,index));$('timeline').value=frame+1;
     const f=data.fields[field];$('time').textContent=f.time[frame].toFixed(3)+' s · '+f.clock;
     $('record').textContent='Record '+(frame+1)+' / 120  ·  '+f.progress[frame].toFixed(1)+'%';
-    $('back').href='../index.html?field='+field+'&record='+(frame+1)+'#comparison';
+    updateLinks();
     $('previous').disabled=frame===0;$('next').disabled=frame===119;paint();
   }
   function stop() {
@@ -193,8 +212,16 @@
     timer=setInterval(()=>{if(frame===119)stop();else updateFrame(frame+1);},105);
   }
   async function select(key) {
-    stop();const request=++token;field=key;fieldCodes=null;changedAt=-1;
+    stop();
+    const previousProgress=data?.fields[field]?.progress[frame];
+    if (data && field!==key && Number.isFinite(previousProgress)) {
+      frame=data.fields[key].progress.reduce((nearest,p,i,all)=>Math.abs(p-previousProgress)<Math.abs(all[nearest]-previousProgress) ? i : nearest,0);
+    }
+    const request=++token;field=key;fieldCodes=null;changedAt=-1;
     for(const btn of document.querySelectorAll('[data-field]'))btn.setAttribute('aria-pressed',String(btn.dataset.field===field));
+    if(!viewerReady){showStatic();return;}
+    document.documentElement.classList.remove('static-preview');
+    $('staticView').hidden=true;
     $('status').hidden=false;$('status').textContent='Loading the recorded surface…';
     const f=data.fields[field];
     const format=(n)=>n.toLocaleString('en-US',{maximumFractionDigits:2,minimumFractionDigits:0});
@@ -204,11 +231,20 @@
     try {
       const values=await loadField(key);if(request!==token)return;
       fieldCodes=values;$('status').hidden=true;paint();
-    } catch(e){if(request===token)showError(e);}
+    } catch(e){if(request===token)showStatic(e);}
   }
-  function showError(e){
-    stop();$('status').hidden=false;$('status').textContent=e.message+' ';
-    const link=document.createElement('a');link.href=$('back').href;link.textContent='Open the field animation';$('status').append(link);
+  function showStatic(error) {
+    stop();
+    frame=59;
+    document.documentElement.classList.add('static-preview');
+    const f=data?.fields[field];
+    const snapshotTime=f ? ' ('+f.time[59].toFixed(3)+' s, '+f.clock+')' : '';
+    $('staticNote').textContent='The interactive renderer is unavailable. Showing record 60 of 120'+snapshotTime+'.';
+    $('poster').alt=activeCase.label+' at record 60: Abaqus reference and PAIG-Net prediction for '+field+'.';
+    $('poster').src=activeCase.id===117 ? '../media/'+field+'/059.webp' : folder+'poster-'+field+'.webp';
+    $('staticView').hidden=false;
+    for(const btn of document.querySelectorAll('[data-field]'))btn.setAttribute('aria-pressed',String(btn.dataset.field===field));
+    updateLinks();notifyParent();
   }
   function reset(top=false) {
     yaw=top?-Math.PI/2:initialYaw; pitch=top?Math.PI/2:initialPitch;zoom=1;viewChanged=false;paint();
@@ -237,6 +273,19 @@
   $('play').addEventListener('click',togglePlay);$('timeline').addEventListener('input',()=>{stop();updateFrame(+$('timeline').value-1);});
   $('previous').addEventListener('click',()=>{stop();updateFrame(frame-1);});$('next').addEventListener('click',()=>{stop();updateFrame(frame+1);});
   document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();});
-  new ResizeObserver(paint).observe(surface);reset();
-  prepare().then(()=>select(field)).catch(showError);
+  new ResizeObserver(paint).observe(surface);
+  if(embedded) new ResizeObserver(notifyParent).observe(document.querySelector('main'));
+  $('poster').addEventListener('load',notifyParent);
+  reset();
+  async function start(){
+    const script=document.createElement('script');
+    script.src=folder+'surface.js';
+    await new Promise((resolve,reject)=>{script.onload=resolve;script.onerror=reject;document.head.append(script);});
+    data=window.orbitSurface;
+    if(!data || data.case!==activeCase.label) throw Error('Unexpected case geometry');
+    await prepare();
+    viewerReady=true;
+    await select(field);
+  }
+  start().catch(showStatic);
 })();

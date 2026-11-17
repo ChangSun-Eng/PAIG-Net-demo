@@ -4,10 +4,10 @@
 <meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#163e41">
 <title>PAIG-Net · Rotate the field comparison</title>
 <link rel="icon" href="data:,"><link rel="stylesheet" href="../showcase.css"><link rel="stylesheet" href="orbit.css">
-<script defer src="surface.js"></script><script defer src="orbit.js"></script>
+<script defer src="../cases/catalog.js"></script><script defer src="orbit.js"></script>
 </head><body>
 <header class="masthead"><div class="wrap mast-inner"><a class="wordmark" href="../index.html">PAIG-Net</a>
-<nav aria-label="Showcase"><a id="back" href="../index.html#comparison">← Field comparison</a></nav></div></header>
+<nav aria-label="Showcase"><a id="back" href="../index.html#comparison">← All configurations</a></nav></div></header>
 <main class="wrap"><div class="intro"><h1>Rotate the field comparison</h1>
 <p>Drag either plate to rotate both views. Scroll to zoom, or use the arrow and + / − keys with the viewer in focus.</p></div>
 <section class="viewer" aria-label="Synchronized three-dimensional field replay">
@@ -15,7 +15,8 @@
     <button type="button" data-field="temperature" aria-pressed="true">Temperature rise</button>
     <button type="button" data-field="strain" aria-pressed="false">Equivalent strain</button>
     <button type="button" data-field="stress" aria-pressed="false">Von Mises stress</button></div>
-    <span class="case-label">C2-117 · Linked cameras</span></div>
+    <span class="case-label" id="caseInfo"></span></div>
+  <div id="staticView" hidden><img id="poster" alt=""><p id="staticNote" role="status"></p></div>
   <div class="scene-captions"><h2>FE reference <small>Abaqus</small></h2><h2>PAIG-Net prediction</h2></div>
   <div class="scene"><canvas id="surface" tabindex="0" aria-label="Paired three-dimensional fields. Use arrow keys to rotate, plus and minus to zoom, or R to reset."></canvas>
     <p id="status" role="status">Loading the recorded surface…</p></div>
@@ -27,7 +28,8 @@
   <button type="button" class="play" id="play" aria-pressed="false"><span class="play-icon" aria-hidden="true"></span><span id="playText">Play</span></button>
   <button type="button" class="step" id="next" aria-label="Next frame">›</button></div>
   <div class="scrubber"><div class="readings"><strong id="time">—</strong><span id="record">—</span></div>
-  <input id="timeline" type="range" min="1" max="120" value="60" step="1" aria-label="Recorded frame"></div></div>
+  <input id="timeline" type="range" min="1" max="120" value="60" step="1" aria-label="Recorded frame"></div>
+  <a class="frame-link" id="expand" target="_blank" rel="noopener" hidden>Open 3D view ↗</a></div>
 </section>
 <details class="notes"><summary>Surface rendering and native times</summary><p>The two plates share the same undeformed surface mesh, camera and field scale. The colours use bilinear interpolation within the original surface quadrilaterals. The 120 records use 4,096 display levels across each field’s fixed range. Temperature rise is relative to 400 °C. Equivalent strain is the instantaneous deviatoric equivalent of total logarithmic strain. Von Mises stress uses the elastic-strain constitutive route in PAIG-Net. The thermal and mechanical fields retain their respective heat-transfer and stress-analysis clocks.</p></details>
 <noscript><p>Enable JavaScript for the 3D comparison, or <a href="../media/preview.gif">open the paired animation</a>.</p></noscript>

@@ -193,6 +193,9 @@
   let requestId = 0;
   let playing = false;
   let timer = null;
+  let selectedCase = 117;
+  let nestedViewer = null;
+  let activeRecord = { field:"temperature", record:60 };
 
   function stop() {
     playing = false;
@@ -211,16 +214,17 @@
 
   if (!data || !Array.isArray(data.fields) || !data.fields.length ||
       data.fields.some(f => !Array.isArray(f.frames) || !f.frames.length)) {
-    showError("The saved field data could not be opened. Extract the complete showcase folder, including its media folder, and reopen index.html.");
+    showError("The field metadata could not be loaded. Reload this page to try again.");
     for (const el of [playButton, slider, byId("previous"), byId("next")]) el.disabled = true;
     return;
   }
 
-  const condition = [];
-  if (Number.isFinite(data.powerW)) condition.push(data.powerW.toFixed(1) + " W");
-  if (Number.isFinite(data.speedMmPerS)) condition.push(data.speedMmPerS.toFixed(1) + " mm/s");
-  byId("caseLabel").textContent = [data.caseLabel, ...condition].filter(Boolean).join(" · ");
-  byId("provenance").textContent = [data.provenance, data.sourceNote, data.view].filter(Boolean).join(" ");
+  const cases = new Map((window.PAIG_CASES || [{
+    id:117,label:data.caseLabel,powerW:data.powerW,speedMmPerS:data.speedMmPerS,
+    wape:{temperature:1.7190,strain:4.9113,stress:6.2681}
+  }]).map(item => [item.id,item]));
+  const casePicker = byId("caseSelect");
+  casePicker.replaceChildren(...[...cases.values()].map(item => new Option(item.label,String(item.id))));
 
   const fields = new Map(data.fields.map(f => [f.id, f]));
   for (const entry of data.fields) {
@@ -280,6 +284,7 @@
       if (token !== requestId) return;
       field = newField;
       frame = selected;
+      activeRecord = {field:field.id,record:sample.recordIndex ?? frame + 1};
       for (const btn of byId("field").querySelectorAll("button")) {
         btn.setAttribute("aria-pressed", String(btn.dataset.field === field.id));
       }
@@ -292,7 +297,7 @@
       byId("openFrame").title = "Open the original " + picture.naturalWidth + " × " + picture.naturalHeight + " pixel comparison";
       byId("openFrame").hidden = false;
       byId("orbitLink").href = "orbit/index.html?" + new URLSearchParams({
-        field:field.id, record:String(sample.recordIndex ?? frame + 1)
+        case:"117", field:field.id, record:String(sample.recordIndex ?? frame + 1)
       });
       byId("orbitLink").hidden = false;
       byId("time").textContent = (field.clock ? field.clock + " time · " : "") + formatSeconds(sample.time) + " s";
@@ -312,7 +317,7 @@
         requestedField = field;
         requestedFrame = frame;
         if (field) slider.value = String(frame);
-        showError("This stored frame could not be opened. Check that the complete media folder is present.");
+        showError("This stored frame could not be opened. Select another frame or reload the page.");
       }
     }
   }
@@ -347,9 +352,48 @@
   });
   document.addEventListener("visibilitychange", () => { if (document.hidden) stop(); });
   window.addEventListener("pagehide", stop);
+  function showCase(id,state) {
+    const item = cases.get(id) || cases.get(117);
+    selectedCase = item.id;
+    activeRecord = {...state};
+    casePicker.value = String(item.id);
+    stop();
+    ++requestId;
+    byId("caseParams").textContent = [item.powerW.toFixed(1)+" W",item.speedMmPerS.toFixed(1)+" mm/s"].join(" · ");
+    const scores=item.wape;
+    byId("caseScores").textContent = item.label+" • Whole-case WAPE: "+scores.temperature.toFixed(2)+"% for temperature rise, "+scores.strain.toFixed(2)+"% for equivalent strain, and "+scores.stress.toFixed(2)+"% for von Mises stress.";
+    byId("fieldNote").textContent = "";
+    byId("provenance").textContent = item.id===117 ? [data.provenance,data.sourceNote,data.view].filter(Boolean).join(" ") : "Previously saved Abaqus fields and PAIG-Net predictions, displayed on the same undeformed surface. Rotate either view to compare the two fields.";
+    const standard = item.id === 117;
+    byId("hdViewer").hidden = !standard;
+    const holder=byId("caseViewer");
+    holder.hidden=standard;
+    holder.replaceChildren();
+    nestedViewer=null;
+    if(standard) {
+      renderFrame(fields.get(state.field) || data.fields[0], state.record-1);
+    } else {
+      nestedViewer=document.createElement("iframe");
+      nestedViewer.title="Abaqus and PAIG-Net field comparison for "+item.label;
+      nestedViewer.src="orbit/index.html?"+new URLSearchParams({case:String(item.id),field:state.field,record:String(state.record),embed:"1"});
+      holder.append(nestedViewer);
+    }
+  }
+
+  window.addEventListener("message", event => {
+    if (!nestedViewer || event.source!==nestedViewer.contentWindow ||
+        (location.protocol!=="file:" && event.origin!==location.origin)) return;
+    const message=event.data;
+    if (!message || message.type!=="paig-view" || message.case!==selectedCase) return;
+    if (Number.isFinite(message.height)) nestedViewer.style.height=Math.max(260,Math.min(1200,message.height))+"px";
+    if (fields.has(message.field) && Number.isInteger(message.record) && message.record>=1 && message.record<=120) {
+      activeRecord={field:message.field,record:message.record};
+    }
+  });
+  casePicker.addEventListener("change",()=>showCase(Number(casePicker.value),activeRecord));
   const query = new URLSearchParams(location.search);
   const initial = fields.get(query.get("field")) || data.fields[0];
   const specified = Number(query.get("record"));
   const startRecord = Number.isInteger(specified) && specified > 0 ? specified : 60;
-  renderFrame(initial, Math.min(startRecord,initial.frames.length) - 1);
+  showCase(Number(query.get("case")) || 117, {field:initial.id,record:Math.min(startRecord,initial.frames.length)});
 })();

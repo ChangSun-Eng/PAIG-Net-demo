@@ -30,6 +30,11 @@ h1 { font-size:clamp(2.45rem,4.7vw,4.4rem) }
 .field-picker button:hover,.figure-picker button:hover { color:var(--deep); background:#eef4f0 }
 .field-picker button[aria-pressed=true] { color:#fff; background:var(--deep) }
 .case-label { color:var(--muted); font-size:.83rem; font-weight:550 }
+.case-bar { display:flex; align-items:center; flex-wrap:wrap; gap:9px 13px; margin:0 0 12px; color:var(--ink); font-size:.9rem }
+.case-bar label { font-weight:650 }
+.case-bar select { min-height:38px; padding:5px 28px 5px 10px; color:var(--deep); background:white; border:1px solid #aabdb9; border-radius:4px; font:inherit; font-weight:650; cursor:pointer }
+.case-params { color:var(--muted); font-variant-numeric:tabular-nums }
+#caseViewer iframe { display:block; width:100%; height:616px; border:0; border-radius:7px }
 .frame-view { position:relative; width:100%; aspect-ratio:2368 / 984; display:grid; align-items:center; background:white }
 .frame-view img { max-width:100%; height:auto; width:100%; display:block }
 [hidden] { display:none!important }
