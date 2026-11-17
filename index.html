@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-viewer-version="20261117.4">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -8,13 +8,13 @@
   <meta name="theme-color" content="#163e41">
   <title>PAIG-Net · Field comparison and physics audit</title>
   <link rel="icon" href="data:,">
-  <link rel="preload" as="image" href="media/temperature/059.webp" fetchpriority="high">
-  <link rel="stylesheet" href="showcase.css?v=20261117.3">
-  <script defer src="media/fields.js?v=20261117.3"></script>
-  <script defer src="cases/catalog.js?v=20261117.3"></script>
-  <script defer src="showcase.js?v=20261117.3"></script>
-  <script defer src="method/network-method-scene.js?v=20261117.3"></script>
-  <script defer src="method/gmb-scene.js?v=20261117.3"></script>
+  <link rel="preload" as="image" href="media/temperature/059.webp?v=20261117.4" fetchpriority="high">
+  <link rel="stylesheet" href="showcase.css?v=20261117.4">
+  <script defer src="media/fields.js?v=20261117.4"></script>
+  <script defer src="cases/catalog.js?v=20261117.4"></script>
+  <script defer src="showcase.js?v=20261117.4"></script>
+  <script defer src="method/network-method-scene.js?v=20261117.4"></script>
+  <script defer src="method/gmb-scene.js?v=20261117.4"></script>
 </head>
 <body>
   <a class="skip" href="#comparison">Skip to field comparison</a>
@@ -32,7 +32,7 @@
       </div>
       <div class="case-bar" id="caseLabel">
         <label for="caseSelect">Scan configuration</label>
-        <select id="caseSelect" aria-label="Scan configuration" disabled><option value="117">C2-117</option></select>
+        <select id="caseSelect" aria-label="Scan configuration" disabled><option value="1">Case 1</option></select>
         <span class="case-params" id="caseParams"></span>
       </div>
       <div class="viewer" id="hdViewer">
@@ -40,10 +40,10 @@
           <div id="field" class="field-picker" role="group" aria-label="Displayed field"><span>Temperature rise</span></div>
         </div>
         <div id="frameView" class="frame-view">
-          <img id="fieldFrame" src="media/temperature/059.webp" fetchpriority="high" alt="C2-117 temperature rise at 10.6579 s, Abaqus reference on the left and PAIG-Net prediction on the right." width="2368" height="984">
+          <img id="fieldFrame" src="media/temperature/059.webp?v=20261117.4" fetchpriority="high" alt="Case 1 temperature rise at 10.6579 s, Abaqus reference on the left and PAIG-Net prediction on the right." width="2368" height="984">
           <p id="error" class="error" role="alert" hidden></p>
         </div>
-        <p id="startupNotice" class="startup-notice">C2-117 preview · frame 60 of 120. <a href="media/comparison-hd.webp">Watch the animation directly</a></p>
+        <p id="startupNotice" class="startup-notice">Case 1 preview · frame 60 of 120. <a href="media/comparison-hd.webp?v=20261117.4">Watch the animation directly</a></p>
         <div class="playback">
           <div class="transport" role="group" aria-label="Frame playback">
             <button type="button" id="previous" class="step" title="Previous frame" aria-label="Previous frame" disabled>‹</button>

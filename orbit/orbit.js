@@ -4,9 +4,9 @@
   const $ = id => document.getElementById(id);
   let data, viewerReady=false;
   const query = new URLSearchParams(location.search);
-  const revision = '20261117.3';
+  const revision = '20261117.4';
   // Older cached orbit pages lack the multicase viewer controls.
-  if (!$('staticView') || !$('expand')) {
+  if (document.documentElement.dataset.viewerVersion !== revision || !$('staticView') || !$('expand')) {
     const fresh = new URL(location.href);
     if (fresh.searchParams.get('v') !== revision) {
       fresh.searchParams.set('v',revision);
@@ -16,9 +16,15 @@
     }
     return;
   }
-  const cases=window.PAIG_CASES || [{id:117,label:"C2-117"}];
-  const activeCase=cases.find(c=>c.id===Number(query.get('case'))) || cases.find(c=>c.id===117);
-  const folder=activeCase.id===117 ? '' : '../cases/C2-'+activeCase.id+'/';
+  const cases=window.PAIG_CASES || [{id:117,rank:1,label:"Case 1"}];
+  const requestedCase=Number(query.get('case'));
+  const activeCase=cases.find(c=>c.rank===requestedCase || c.id===requestedCase) || cases[0];
+  const folder=activeCase.rank===1 ? '' : '../cases/case-'+activeCase.rank+'/';
+  if (/^https?:$/.test(location.protocol) && query.has('case') && requestedCase!==activeCase.rank) {
+    const address=new URL(location.href);
+    address.searchParams.set('case',String(activeCase.rank));
+    history.replaceState(null,'',address);
+  }
   const embedded=query.get('embed')==='1' && window.parent!==window;
   document.documentElement.classList.toggle('embed',embedded);
   $('caseInfo').textContent = embedded ? 'Drag to rotate both views' : activeCase.label+' · Linked cameras';
@@ -200,7 +206,7 @@
       location.protocol==='file:' ? '*' : location.origin);
   }
   function updateLinks() {
-    const params=new URLSearchParams({case:String(activeCase.id),field,record:String(frame+1),v:revision});
+    const params=new URLSearchParams({case:String(activeCase.rank),field,record:String(frame+1),v:revision});
     $('back').href='../index.html?'+params+'#comparison';
     $('expand').href='index.html?'+params;
     notifyParent();
@@ -253,7 +259,7 @@
     const snapshotTime=f ? ' ('+f.time[59].toFixed(3)+' s, '+f.clock+')' : '';
     $('staticNote').textContent='The interactive renderer is unavailable. Showing record 60 of 120'+snapshotTime+'.';
     $('poster').alt=activeCase.label+' at record 60: Abaqus reference and PAIG-Net prediction for '+field+'.';
-    $('poster').src=activeCase.id===117 ? '../media/'+field+'/059.webp' : folder+'poster-'+field+'.webp';
+    $('poster').src=(activeCase.rank===1 ? '../media/'+field+'/059.webp' : folder+'poster-'+field+'.webp')+'?v='+revision;
     $('staticView').hidden=false;
     for(const btn of document.querySelectorAll('[data-field]'))btn.setAttribute('aria-pressed',String(btn.dataset.field===field));
     updateLinks();notifyParent();

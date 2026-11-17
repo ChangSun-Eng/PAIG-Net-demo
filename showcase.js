@@ -3,14 +3,14 @@
   "use strict";
 
   const byId = id => document.getElementById(id);
-  const build = "20261117.3";
+  const build = "20261117.4";
   // A cached page may still load this script at its former unversioned URL.
-  if (!byId("caseSelect") || !byId("startupNotice")) {
+  if (document.documentElement.dataset.viewerVersion !== build || !byId("caseSelect") || !byId("startupNotice")) {
     const poster = byId("fieldFrame");
     if (poster) {
-      poster.src = "media/temperature/059.webp";
+      poster.src = "media/temperature/059.webp?v=" + build;
       poster.hidden = false;
-      poster.alt = "C2-117 temperature rise, frame 60 of 120.";
+      poster.alt = "Case 1 temperature rise, frame 60 of 120.";
     }
     const fresh = new URL(location.href);
     if (fresh.searchParams.get("v") !== build) {
@@ -20,7 +20,7 @@
       const error = byId("error");
       if (error) {
         const animation = document.createElement("a");
-        animation.href = "media/comparison-hd.webp";
+        animation.href = "media/comparison-hd.webp?v=" + build;
         animation.textContent = "Watch the field animation";
         error.replaceChildren("The interactive viewer could not start. ", animation);
         error.hidden = false;
@@ -245,11 +245,11 @@
   }
 
   const cases = new Map((window.PAIG_CASES || [{
-    id:117,label:data.caseLabel,powerW:data.powerW,speedMmPerS:data.speedMmPerS,
+    id:117,rank:1,label:"Case 1",powerW:data.powerW,speedMmPerS:data.speedMmPerS,
     wape:{temperature:1.7190,strain:4.9113,stress:6.2681}
   }]).map(item => [item.id,item]));
   const casePicker = byId("caseSelect");
-  casePicker.replaceChildren(...[...cases.values()].map(item => new Option(item.label,String(item.id))));
+  casePicker.replaceChildren(...[...cases.values()].map(item => new Option(item.label,String(item.rank))));
   casePicker.disabled = false;
 
   const fields = new Map(data.fields.map(f => [f.id, f]));
@@ -307,7 +307,7 @@
     const sample = newField.frames[selected];
     byId("frameView").setAttribute("aria-busy", "true");
     try {
-      const picture = await loadPicture(sample.src);
+      const picture = await loadPicture(sample.src+"?v="+build);
       if (token !== requestId) return;
       field = newField;
       frame = selected;
@@ -327,7 +327,7 @@
       byId("openFrame").title = "Open the original " + picture.naturalWidth + " × " + picture.naturalHeight + " pixel comparison";
       byId("openFrame").hidden = false;
       byId("orbitLink").href = "orbit/index.html?" + new URLSearchParams({
-        case:"117", field:field.id, record:String(sample.recordIndex ?? frame + 1), v:build
+        case:"1", field:field.id, record:String(sample.recordIndex ?? frame + 1), v:build
       });
       byId("orbitLink").hidden = false;
       byId("time").textContent = (field.clock ? field.clock + " time · " : "") + formatSeconds(sample.time) + " s";
@@ -383,10 +383,17 @@
   document.addEventListener("visibilitychange", () => { if (document.hidden) stop(); });
   window.addEventListener("pagehide", stop);
   function showCase(id,state) {
-    const item = cases.get(id) || cases.get(117);
+    const item = [...cases.values()].find(c => c.rank === id) || cases.get(id) || cases.get(117);
     selectedCase = item.id;
     activeRecord = {...state};
-    casePicker.value = String(item.id);
+    casePicker.value = String(item.rank);
+    if (/^https?:$/.test(location.protocol)) {
+      const address = new URL(location.href);
+      if (address.searchParams.has("case") || item.rank !== 1) {
+        address.searchParams.set("case", String(item.rank));
+        history.replaceState(null, "", address);
+      }
+    }
     stop();
     ++requestId;
     byId("caseParams").textContent = [item.powerW.toFixed(1)+" W",item.speedMmPerS.toFixed(1)+" mm/s"].join(" · ");
@@ -405,7 +412,7 @@
     } else {
       nestedViewer=document.createElement("iframe");
       nestedViewer.title="Abaqus and PAIG-Net field comparison for "+item.label;
-      nestedViewer.src="orbit/index.html?"+new URLSearchParams({case:String(item.id),field:state.field,record:String(state.record),embed:"1",v:build});
+      nestedViewer.src="orbit/index.html?"+new URLSearchParams({case:String(item.rank),field:state.field,record:String(state.record),embed:"1",v:build});
       holder.append(nestedViewer);
     }
   }
