@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#163e41">
+  <title>PAIG-Net · Field comparison and physics audit</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="showcase.css">
+  <script defer src="media/fields.js"></script>
+  <script defer src="method/network-method-scene.js"></script>
+  <script defer src="method/gmb-scene.js"></script>
+  <script defer src="showcase.js"></script>
+</head>
+<body>
+  <a class="skip" href="#comparison">Skip to field comparison</a>
+  <header class="masthead">
+    <div class="wrap mast-inner">
+      <a class="wordmark" href="#comparison" aria-label="PAIG-Net field comparison">PAIG-Net</a>
+      <nav aria-label="Sections"><a href="#comparison">Field comparison</a><a href="#architecture">Architecture</a><a href="#audit">Physics audit</a></nav>
+    </div>
+  </header>
+  <main class="wrap">
+    <section id="comparison">
+      <div class="intro">
+        <h1>Thermomechanical field comparison</h1>
+        <p>Follow the same laser scan in the Abaqus reference and the PAIG-Net prediction.</p>
+      </div>
+      <div class="viewer">
+        <div class="toolbar">
+          <div id="field" class="field-picker" role="group" aria-label="Displayed field"></div>
+          <span class="case-label" id="caseLabel"></span>
+        </div>
+        <div id="frameView" class="frame-view">
+          <img id="fieldFrame" alt="" width="2368" height="984" hidden>
+          <p id="error" class="error" role="alert" hidden></p>
+          <noscript>Enable JavaScript to play and compare the stored fields. <a href="media/preview.gif">View the animated comparison.</a></noscript>
+        </div>
+        <div class="playback">
+          <div class="transport" role="group" aria-label="Frame playback">
+            <button type="button" id="previous" class="step" title="Previous frame" aria-label="Previous frame">‹</button>
+            <button type="button" id="play" class="play" aria-label="Play comparison" aria-pressed="false"><span class="play-icon" aria-hidden="true"></span><span id="playLabel">Play</span></button>
+            <button type="button" id="next" class="step" title="Next frame" aria-label="Next frame">›</button>
+          </div>
+          <div class="scrubber">
+            <div class="readings"><strong id="time">—</strong><span id="frameText">—</span></div>
+            <label class="sr-only" for="timeline">Stored frame</label>
+            <input id="timeline" type="range" min="0" max="0" step="1" value="0">
+          </div>
+          <div class="view-links">
+            <a class="frame-link" id="orbitLink" href="orbit/index.html" hidden>Rotate in 3D <span aria-hidden="true">↗</span></a>
+            <a class="frame-link hd-link" id="openFrame" target="_blank" rel="noopener" hidden>Open HD frame <span aria-hidden="true">↗</span></a>
+          </div>
+        </div>
+      </div>
+      <details class="notes">
+        <summary>Data, timing and colour scales</summary>
+        <div class="notes-body">
+          <p id="provenance"></p><p id="fieldNote"></p>
+          <p>Among the ten saved C2 configurations with all three paired fields, C2-117 has the lowest case-level WAPE for temperature rise (<strong>1.72%</strong>), equivalent total logarithmic strain (<strong>4.91%</strong>), and von Mises stress (<strong>6.27%</strong>). Each score pools all volume nodes and all 120 recorded frames.</p>
+          <p>Both views use the same mesh, camera and colour scale for the selected field. Each frame shows its stored solver time. Switching fields selects the nearest available scan progress on that field’s clock.</p>
+        </div>
+      </details>
+    </section>
+    <section class="paper-section" id="architecture">
+      <div class="section-heading">
+        <h2>Model architecture</h2>
+        <p>The thermal pathway predicts temperature rise. Its features condition the mechanical pathway, which predicts strains and reconstructs stress from elastic strain.</p>
+        <button type="button" class="walkthrough-link" id="openWalkthrough">Explore the network step by step <span aria-hidden="true">↗</span></button>
+      </div>
+      <div class="paper-viewer">
+        <div class="figure-picker" id="figurePicker" role="group" aria-label="Architecture figure">
+          <button type="button" data-fig="1" aria-pressed="true">Overview</button>
+          <button type="button" data-fig="2" aria-pressed="false">Graph inputs</button>
+          <button type="button" data-fig="3" aria-pressed="false">Multiscale processor</button>
+          <button type="button" data-fig="4" aria-pressed="false">Message block</button>
+        </div>
+        <figure>
+          <div class="arch-image"><div id="diagram">
+            <img id="archImage" src="figures/fig01.png" width="1650" height="507" alt="Thermal and mechanical pathways share graph inputs. Thermal features and temperature condition mechanical prediction.">
+            <div id="hotspots"></div>
+          </div></div>
+          <figcaption><span><b id="figureNumber">Fig. 1</b> <span id="figureName">Overall architecture</span></span>
+            <span class="figure-actions"><a id="archZoom" href="figures/fig01.png" data-zoom="architecture">Enlarge</a><a id="archPdf" href="figures/fig01.pdf" target="_blank" rel="noopener">PDF ↗</a></span>
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+    <section class="paper-section" id="audit">
+      <div class="section-heading"><h2>Physics audit</h2>
+        <p>Paired representation exchanges test how a change in process conditions propagates through selected components of the hidden state.</p>
+      </div>
+      <figure class="paper-figure">
+        <a class="image-open" href="figures/fig05.png" data-zoom="exchange"><img loading="lazy" src="figures/fig05.png" alt="A base and changed configuration exchange their projected components while retaining each receiving configuration’s remainder and external inputs."></a>
+        <figcaption><span><b>Fig. 5</b> Paired representation exchange</span><span class="figure-actions"><a href="figures/fig05.png" data-zoom="exchange">Enlarge</a><a href="figures/fig05.pdf" target="_blank" rel="noopener">PDF ↗</a></span></figcaption>
+      </figure>
+      <div class="audit-result">
+        <h3>Which strain information carries the stress response?</h3>
+        <p>For this process-change pair, transferring the elastic-strain-tensor subspace reproduces the original model’s change in von Mises stress more closely than transferring the scalar strain subspace.</p>
+      </div>
+      <figure class="paper-figure">
+        <a class="image-open" href="figures/fig16.png" data-zoom="response"><img loading="lazy" src="figures/fig16.png" alt="Three stress-change fields on one scale in MPa: the original model response, scalar-subspace transfer and elastic-strain-tensor subspace transfer."></a>
+        <figcaption><span><b>Fig. 16</b> Process-induced stress change · common scale in MPa</span><span class="figure-actions"><a href="figures/fig16.png" data-zoom="response">Enlarge</a><a href="figures/fig16.pdf" target="_blank" rel="noopener">PDF ↗</a></span></figcaption>
+      </figure>
+    </section>
+  </main>
+  <footer class="wrap"><span>PAIG-Net</span><a href="#comparison">Back to field comparison ↑</a></footer>
+  <dialog id="walkthrough" aria-labelledby="walkTitle">
+    <div class="dialog-bar"><h2 id="walkTitle">Prediction architecture</h2><button id="closeWalk" type="button">Close <span aria-hidden="true">×</span></button></div>
+    <div class="walk-tools"><button id="walkBack" type="button" hidden>← Back</button><div id="walkSteps" class="figure-picker" role="group" aria-label="Process step"></div></div>
+    <div id="walkGraphic"></div><p id="walkCaption"></p>
+  </dialog>
+  <dialog id="lightbox" aria-labelledby="lightboxTitle"><div class="dialog-bar"><h2 id="lightboxTitle">Figure</h2><button id="closeLightbox" type="button">Close <span aria-hidden="true">×</span></button></div><div class="dialog-image"><img id="largeFigure" alt=""></div><div class="dialog-actions"><a id="originalFigure" target="_blank" rel="noopener">Open original image ↗</a></div></dialog>
+</body>
+</html>

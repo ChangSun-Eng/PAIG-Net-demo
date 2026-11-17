@@ -1,0 +1,21 @@
+.scene-captions {display:grid;grid-template-columns:1fr 1fr;text-align:center;padding:1.15rem .6rem 0;gap:1rem}
+.scene-captions h2 {font-size:clamp(1.25rem,2.7vw,2.15rem);letter-spacing:-.035em}
+.scene-captions small {font:500 .72rem/1.2 "Segoe UI",sans-serif;color:#546e72;margin-left:.45rem}
+.scene {position:relative;height:clamp(218px,32vw,390px)}
+.scene:after {content:"";position:absolute;top:8%;bottom:8%;left:50%;width:1px;pointer-events:none;background:#e9efec}
+#surface {display:block;width:100%;height:100%;touch-action:none;cursor:grab}
+#surface:active {cursor:grabbing}
+#surface:focus-visible {outline:2px solid #b45e32;outline-offset:-3px}
+#status {position:absolute;left:50%;top:40%;transform:translate(-50%);padding:.5rem 1rem;background:white;text-align:center;font-size:.9rem;color:var(--muted);z-index:1}
+.scene-tools,.camera-tools,.camera-tools label {display:flex;align-items:center;gap:.6rem}
+.scene-tools {padding:.65rem clamp(12px,2vw,24px) 1rem;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.camera-tools label {font-size:.85rem;gap:.3rem;color:var(--muted);margin-right:.4rem}
+.camera-tools input {accent-color:var(--teal)}
+.camera-tools button {background:white;border:1px solid var(--line);min-height:32px;border-radius:4px;padding:.3rem .7rem;color:var(--ink);font-size:.83rem}
+.colorbar {min-width:min(260px,100%);max-width:360px;flex:1}
+.spectrum {height:7px;border-radius:2px;background:linear-gradient(to right,#243f91 0%,#247cab 17%,#38c0c0 35%,#97d89a 51%,#f5e266 67%,#f28a41 83%,#b11f35 100%)}
+.scale {display:flex;justify-content:space-between;gap:5px;font-size:.76rem;font-variant-numeric:tabular-nums;color:var(--muted);margin-top:5px}
+.scale strong {font-weight:550}
+.notes p {padding:.75rem .1rem;max-width:100ch;color:var(--muted);line-height:1.6;font-size:.93rem}
+main {padding-bottom:2rem!important}
+@media(max-width:550px){.scene {height:185px}.scene-captions small{display:block;margin:.2rem 0 0}.scene-tools{flex-direction:column;align-items:stretch}.camera-tools{justify-content:flex-end}.colorbar{max-width:none;width:100%}.notes p{font-size:.88rem}}
