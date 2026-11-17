@@ -8,12 +8,13 @@
   <meta name="theme-color" content="#163e41">
   <title>PAIG-Net · Field comparison and physics audit</title>
   <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="showcase.css">
-  <script defer src="media/fields.js"></script>
-  <script defer src="cases/catalog.js"></script>
-  <script defer src="method/network-method-scene.js"></script>
-  <script defer src="method/gmb-scene.js"></script>
-  <script defer src="showcase.js"></script>
+  <link rel="preload" as="image" href="media/temperature/059.webp" fetchpriority="high">
+  <link rel="stylesheet" href="showcase.css?v=20261117.3">
+  <script defer src="media/fields.js?v=20261117.3"></script>
+  <script defer src="cases/catalog.js?v=20261117.3"></script>
+  <script defer src="showcase.js?v=20261117.3"></script>
+  <script defer src="method/network-method-scene.js?v=20261117.3"></script>
+  <script defer src="method/gmb-scene.js?v=20261117.3"></script>
 </head>
 <body>
   <a class="skip" href="#comparison">Skip to field comparison</a>
@@ -31,28 +32,28 @@
       </div>
       <div class="case-bar" id="caseLabel">
         <label for="caseSelect">Scan configuration</label>
-        <select id="caseSelect" aria-label="Scan configuration"><option value="117">C2-117</option></select>
+        <select id="caseSelect" aria-label="Scan configuration" disabled><option value="117">C2-117</option></select>
         <span class="case-params" id="caseParams"></span>
       </div>
       <div class="viewer" id="hdViewer">
         <div class="toolbar">
-          <div id="field" class="field-picker" role="group" aria-label="Displayed field"></div>
+          <div id="field" class="field-picker" role="group" aria-label="Displayed field"><span>Temperature rise</span></div>
         </div>
         <div id="frameView" class="frame-view">
-          <img id="fieldFrame" alt="" width="2368" height="984" hidden>
+          <img id="fieldFrame" src="media/temperature/059.webp" fetchpriority="high" alt="C2-117 temperature rise at 10.6579 s, Abaqus reference on the left and PAIG-Net prediction on the right." width="2368" height="984">
           <p id="error" class="error" role="alert" hidden></p>
-          <noscript>Enable JavaScript to play and compare the stored fields. <a href="media/preview.gif">View the animated comparison.</a></noscript>
         </div>
+        <p id="startupNotice" class="startup-notice">C2-117 preview · frame 60 of 120. <a href="media/comparison-hd.webp">Watch the animation directly</a></p>
         <div class="playback">
           <div class="transport" role="group" aria-label="Frame playback">
-            <button type="button" id="previous" class="step" title="Previous frame" aria-label="Previous frame">‹</button>
-            <button type="button" id="play" class="play" aria-label="Play comparison" aria-pressed="false"><span class="play-icon" aria-hidden="true"></span><span id="playLabel">Play</span></button>
-            <button type="button" id="next" class="step" title="Next frame" aria-label="Next frame">›</button>
+            <button type="button" id="previous" class="step" title="Previous frame" aria-label="Previous frame" disabled>‹</button>
+            <button type="button" id="play" class="play" aria-label="Play comparison" aria-pressed="false" disabled><span class="play-icon" aria-hidden="true"></span><span id="playLabel">Play</span></button>
+            <button type="button" id="next" class="step" title="Next frame" aria-label="Next frame" disabled>›</button>
           </div>
           <div class="scrubber">
-            <div class="readings"><strong id="time">—</strong><span id="frameText">—</span></div>
+            <div class="readings"><strong id="time">HT time · 10.6579 s</strong><span id="frameText">Frame 60 / 120 · 50.0%</span></div>
             <label class="sr-only" for="timeline">Stored frame</label>
-            <input id="timeline" type="range" min="0" max="0" step="1" value="0">
+            <input id="timeline" type="range" min="0" max="119" step="1" value="59" disabled>
           </div>
           <div class="view-links">
             <a class="frame-link" id="orbitLink" href="orbit/index.html" hidden>Rotate in 3D <span aria-hidden="true">↗</span></a>

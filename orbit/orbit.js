@@ -4,6 +4,18 @@
   const $ = id => document.getElementById(id);
   let data, viewerReady=false;
   const query = new URLSearchParams(location.search);
+  const revision = '20261117.3';
+  // Older cached orbit pages lack the multicase viewer controls.
+  if (!$('staticView') || !$('expand')) {
+    const fresh = new URL(location.href);
+    if (fresh.searchParams.get('v') !== revision) {
+      fresh.searchParams.set('v',revision);
+      location.replace(fresh.href);
+    } else if ($('status')) {
+      $('status').textContent='Please reload to open the updated 3D viewer.';
+    }
+    return;
+  }
   const cases=window.PAIG_CASES || [{id:117,label:"C2-117"}];
   const activeCase=cases.find(c=>c.id===Number(query.get('case'))) || cases.find(c=>c.id===117);
   const folder=activeCase.id===117 ? '' : '../cases/C2-'+activeCase.id+'/';
@@ -57,7 +69,7 @@
   function loadField(key) {
     if (!pending.has(key)) pending.set(key, new Promise((resolve,reject) => {
       const script = document.createElement('script');
-      script.src = folder + key + '.js';
+      script.src = folder + key + '.js?v=' + revision;
       script.onerror = () => reject(Error('The saved display colours could not be opened.'));
       script.onload = async () => {
         try {
@@ -188,7 +200,7 @@
       location.protocol==='file:' ? '*' : location.origin);
   }
   function updateLinks() {
-    const params=new URLSearchParams({case:String(activeCase.id),field,record:String(frame+1)});
+    const params=new URLSearchParams({case:String(activeCase.id),field,record:String(frame+1),v:revision});
     $('back').href='../index.html?'+params+'#comparison';
     $('expand').href='index.html?'+params;
     notifyParent();
@@ -222,7 +234,7 @@
     if(!viewerReady){showStatic();return;}
     document.documentElement.classList.remove('static-preview');
     $('staticView').hidden=true;
-    $('status').hidden=false;$('status').textContent='Loading the recorded surface…';
+    $('status').hidden=false;
     const f=data.fields[field];
     const format=(n)=>n.toLocaleString('en-US',{maximumFractionDigits:2,minimumFractionDigits:0});
     $('scaleMin').textContent=format(f.low);$('scaleMax').textContent=format(f.high);
@@ -279,7 +291,7 @@
   reset();
   async function start(){
     const script=document.createElement('script');
-    script.src=folder+'surface.js';
+    script.src=folder+'surface.js?v='+revision;
     await new Promise((resolve,reject)=>{script.onload=resolve;script.onerror=reject;document.head.append(script);});
     data=window.orbitSurface;
     if(!data || data.case!==activeCase.label) throw Error('Unexpected case geometry');

@@ -38,6 +38,8 @@ h1 { font-size:clamp(2.45rem,4.7vw,4.4rem) }
 .frame-view { position:relative; width:100%; aspect-ratio:2368 / 984; display:grid; align-items:center; background:white }
 .frame-view img { max-width:100%; height:auto; width:100%; display:block }
 [hidden] { display:none!important }
+.startup-notice { margin:0; padding:8px 24px 12px; color:var(--muted); font-size:.88rem }
+.startup-notice a { margin-left:.4em }
 .error,.frame-view noscript { padding:20px; color:#77351c }
 .playback { display:flex; align-items:center; gap:clamp(12px,2.5vw,34px); padding:14px clamp(12px,2vw,24px); border-top:1px solid var(--line); background:#fbfcfa }
 .transport { display:flex; align-items:center; gap:5px }

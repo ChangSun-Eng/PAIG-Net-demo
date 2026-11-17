@@ -3,6 +3,31 @@
   "use strict";
 
   const byId = id => document.getElementById(id);
+  const build = "20261117.3";
+  // A cached page may still load this script at its former unversioned URL.
+  if (!byId("caseSelect") || !byId("startupNotice")) {
+    const poster = byId("fieldFrame");
+    if (poster) {
+      poster.src = "media/temperature/059.webp";
+      poster.hidden = false;
+      poster.alt = "C2-117 temperature rise, frame 60 of 120.";
+    }
+    const fresh = new URL(location.href);
+    if (fresh.searchParams.get("v") !== build) {
+      fresh.searchParams.set("v", build);
+      location.replace(fresh.href);
+    } else {
+      const error = byId("error");
+      if (error) {
+        const animation = document.createElement("a");
+        animation.href = "media/comparison-hd.webp";
+        animation.textContent = "Watch the field animation";
+        error.replaceChildren("The interactive viewer could not start. ", animation);
+        error.hidden = false;
+      }
+    }
+    return;
+  }
 
   const figures = {
     1: {
@@ -225,8 +250,10 @@
   }]).map(item => [item.id,item]));
   const casePicker = byId("caseSelect");
   casePicker.replaceChildren(...[...cases.values()].map(item => new Option(item.label,String(item.id))));
+  casePicker.disabled = false;
 
   const fields = new Map(data.fields.map(f => [f.id, f]));
+  byId("field").replaceChildren();
   for (const entry of data.fields) {
     const button = document.createElement("button");
     button.dataset.field = entry.id;
@@ -289,6 +316,9 @@
         btn.setAttribute("aria-pressed", String(btn.dataset.field === field.id));
       }
       errorBox.hidden = true;
+      byId("startupNotice").hidden = true;
+      slider.disabled = false;
+      playButton.disabled = false;
       frameImage.alt = field.label + " at " + formatSeconds(sample.time) +
         " seconds, Abaqus finite-element field on the left and PAIG-Net prediction on the right, on a shared scale in " + field.unit + ".";
       frameImage.src = picture.src;
@@ -297,7 +327,7 @@
       byId("openFrame").title = "Open the original " + picture.naturalWidth + " × " + picture.naturalHeight + " pixel comparison";
       byId("openFrame").hidden = false;
       byId("orbitLink").href = "orbit/index.html?" + new URLSearchParams({
-        case:"117", field:field.id, record:String(sample.recordIndex ?? frame + 1)
+        case:"117", field:field.id, record:String(sample.recordIndex ?? frame + 1), v:build
       });
       byId("orbitLink").hidden = false;
       byId("time").textContent = (field.clock ? field.clock + " time · " : "") + formatSeconds(sample.time) + " s";
@@ -375,7 +405,7 @@
     } else {
       nestedViewer=document.createElement("iframe");
       nestedViewer.title="Abaqus and PAIG-Net field comparison for "+item.label;
-      nestedViewer.src="orbit/index.html?"+new URLSearchParams({case:String(item.id),field:state.field,record:String(state.record),embed:"1"});
+      nestedViewer.src="orbit/index.html?"+new URLSearchParams({case:String(item.id),field:state.field,record:String(state.record),embed:"1",v:build});
       holder.append(nestedViewer);
     }
   }
